@@ -1,8 +1,19 @@
+# Python
 .venv/
 __pycache__/
 *.pyc
-.idea/
-.DS_Store
 *.egg-info/
 dist/
 build/
+
+# IDE
+.idea/
+.DS_Store
+
+# Private — local only, never pushed
+CLAUDE.md
+notes.md
+notes.tex
+compare_risk_measures_distributions.py
+.claude/
+push_public.sh
