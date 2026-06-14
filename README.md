@@ -1,57 +1,38 @@
-# Risk Measures: EVaR, CVaR, VaR
+# Risk Measures: EVaR, CVaR, and VaR
 
-A clean Python implementation of risk measures — VaR, CVaR, and EVaR — with empirical estimation and comparison across distribution families.
+One important topic in fields such as finance, insurance, health, and agriculture is risk-sensitive decision making.
 
-This is the foundation for a larger project on risk-sensitive Best Arm Identification (BAI), where the goal will be to identify the arm with the lowest EVaR rather than the highest mean.
+This project implements three classical risk measures — VaR, CVaR, and EVaR — and compares them empirically across distributions with different tail behaviors.
 
-## Motivation
+## What are these risk measures?
 
-EVaR (Entropic Value at Risk) is an information-theoretic risk measure derived from the moment generating function. It is tighter than CVaR (Conditional Value at Risk) and more sensitive to tail behavior, making it a natural fit for risk-averse decision making under uncertainty.
+Given samples from a distribution and a confidence level α ∈ (0, 1), when we observe X as reward:
 
-## Project structure
+- **VaR(α)** is the α-quantile — a threshold below which α of outcomes fall. Simple, but it completely ignores what happens beyond that threshold.
+- **CVaR(α)** is the expected value of outcomes that exceed VaR(α). It looks at the tail, not just the edge of it.
+- **EVaR(α)** goes further. It is derived from the moment generating function and provides the tightest possible upper bound on tail risk within the Chernoff family. EVaR is always at least as large as CVaR — often significantly so on heavy-tailed distributions.
 
-```
-evarbai/
-├── Risk_measures_new.py    # EVaR, CVaR, VaR — RiskMeasures class
-├── experiment_11J26.py     # distribution comparison experiment
-├── notes.md                # Python engineering notes (quick reference)
-└── notes.tex               # same notes as compilable LaTeX report
-```
-
-## Risk measures
-
-Given samples from a distribution and a confidence level α ∈ (0,1):
-
-- **VaR(α)** — the α-quantile; ignores what happens beyond the threshold
-- **CVaR(α)** — expected value of losses exceeding VaR(α); accounts for tail shape
-- **EVaR(α)** — tightest upper bound from the Chernoff family; strictly more conservative than CVaR
-
-EVaR is computed via:
+EVaR is computed by solving:
 
 ```
 EVaR_α(X) = inf_{z>0} (1/z) [log E[e^{zX}] − log(1−α)]
 ```
 
-The log-sum-exp trick is used for numerical stability in the MGF estimate.
+The implementation uses the log-sum-exp trick for numerical stability when estimating the moment generating function from samples.
 
-## Observations: EVaR vs CVaR across distributions
+## What does the comparison show?
 
-The plot below compares EVaR and CVaR as α varies from 0.1 to 0.9 across four distributions.
+Running EVaR and CVaR across four distributions tells a clear story:
 
-| Distribution | Tail type | EVaR vs CVaR |
+| Distribution | Tail behavior | EVaR vs CVaR |
 |---|---|---|
-| Gaussian | Light, symmetric | Nearly identical across all α |
-| Log-normal | Light, right-skewed | Mild divergence at high α |
-| Pareto (shape=2) | Heavy, power-law | Large divergence at high α |
-| Student-t (df=3) | Heavy, symmetric | Large divergence at high α |
+| Gaussian | Light, symmetric | Almost identical — tails are negligible |
+| Log-normal | Skewed, light tail | Small gap at high α |
+| Pareto (shape=2) | Heavy, power-law | Large gap — EVaR is much more conservative |
+| Student-t (df=3) | Heavy, symmetric | Large gap — same story |
 
-**Key observation:** EVaR and CVaR agree on light-tailed distributions and diverge increasingly on heavy-tailed ones, with the gap growing as α → 1. This confirms that EVaR is a strictly tighter risk measure than CVaR, and the difference is practically significant only when tail risk is non-negligible.
+The gap between EVaR and CVaR grows with tail heaviness and with α. On a Gaussian, the two measures are nearly interchangeable. On a Pareto or Student-t, EVaR can be substantially larger — which matters when the cost of a bad outcome is high.
 
-## Planned algorithms
-
-- [ ] LUCB (Lower Upper Confidence Bound) adapted for EVaR
-- [ ] KL-LUCB with EVaR-based confidence bounds
-- [ ] Track-and-Stop with EVaR as the target quantity
 
 ## Requirements
 
